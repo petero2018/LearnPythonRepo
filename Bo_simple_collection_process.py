@@ -7,21 +7,25 @@ import argparse
 
 def input_value():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--source", help="Please specify the main directory where your source files located")
+    parser.add_argument("-s", "--source", help = "Please specify the main directory where your source JSON files located")
+    parser.add_argument("-d", "--destination", help = "Please specify the main directory where your CSV file should be saved")
     args = parser.parse_args()
-    return args.source
+    return {
+                "source": args.source,
+                "destination": args.destination
+            }
 
 
-def simple_collection_process(source):
+def simple_collection_process(source, destination):
     try:
 
-        print(source, ' source directory submitted')
+        print('{} source and {} destination directories submitted'.format(source, destination))
 
         date_time = datetime.now().strftime("%Y-%m-%d")
-        if source[len(source)-1] != '/':
-            destination = '/'.join([source, ('complaints-' + date_time + '.csv')])
+        if destination[len(destination)-1] != '/':
+            destination = '/'.join([destination, ('complaints-' + date_time + '.csv')])
         else:
-            destination = source + 'complaints-' + date_time + '.csv'
+            destination = destination + 'complaints-' + date_time + '.csv'
 
         for r, d, f in os.walk(source):
             for file in f:
@@ -32,10 +36,12 @@ def simple_collection_process(source):
                         content = content.replace('"\\"', '"').replace('\\""', '"')
                         if os.path.splitext(file)[0] == "category_names":
                             category_names = pd.Series(json.loads(content))
-                        if os.path.splitext(file)[0] == "service_names":
+                        elif os.path.splitext(file)[0] == "service_names":
                             service_names = pd.Series(json.loads(content))
-                        if os.path.splitext(file)[0] == "complaints":
+                        elif os.path.splitext(file)[0] == "complaints":
                             complaints = pd.DataFrame(json.loads(content))
+                        else:
+                            print('Unknown JSON file found')
 
         print('Concat JSON files')
 
@@ -45,7 +51,7 @@ def simple_collection_process(source):
                                                 'created_at': 'Complaint Created At', 'text': 'Complaint Text'
                                                 })
 
-        complaints[['Service Name', 'Category Name', 'Complaint Created At', 'Complaint Text']].to_csv(destination, index=False)
+        complaints[['Service Name', 'Category Name', 'Complaint Created At', 'Complaint Text']].to_csv(destination, index = False)
         print('CSV saved to destination', destination)
 
     except Exception as e:
@@ -55,8 +61,8 @@ def simple_collection_process(source):
 
 def main():
 
-    source = input_value()
-    simple_collection_process(source)
+    inputs = input_value()
+    simple_collection_process(inputs['source'], inputs['destination'])
 
 
 if __name__=='__main__':
