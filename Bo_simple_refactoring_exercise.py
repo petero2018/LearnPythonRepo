@@ -1,3 +1,14 @@
+"""
+The program is created for the purpose to test log_parser.py.
+the exercise was to refactor the given code.
+
+Possible prompt to invoke:
+python -m unittest log_parser_test.py
+
+Version: Python 3.6.8
+Created by: Peter Osztodi
+"""
+
 import unittest
 from log_parser import return_method
 
