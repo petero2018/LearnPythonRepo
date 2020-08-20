@@ -49,5 +49,3 @@ try:
 
 except smtplib.SMTPException as e:
     print(e)
-
-
